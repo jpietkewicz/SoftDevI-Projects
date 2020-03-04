@@ -7,11 +7,63 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import org.htmlparser.beans.StringBean;
 
-class WebpageWordCount {
+import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
-	public static void main(String[] args) {
+public class WebpageWordCount extends Application {
+
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+
+		Button startButton = new Button("Let's do this!");
+		startButton.setAlignment(Pos.CENTER);
+		startButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				LinkedHashMap<String, Integer> sortedMap = getResults();
+				String resultsText = "";
+
+				int i = 0, numToPrint = 20;
+				for (Entry<String, Integer> e : sortedMap.entrySet()) {
+					if (i++ < numToPrint) {
+						resultsText += (i + " - " + e.getKey() + "\n");
+					}
+				}
+
+				Text results = new Text();
+				results.setText(resultsText);
+
+				StackPane root2 = new StackPane();
+				root2.getChildren().add(results);
+				Scene resultsScene = new Scene(root2, 300, 350);
+				primaryStage.setScene(resultsScene);
+				primaryStage.show();
+			}
+
+		});
+
+		StackPane root = new StackPane();
+		root.getChildren().add(startButton);
+
+		Scene scene = new Scene(root, 300, 100);
+		primaryStage.setTitle("Word Occurences GUI");
+		primaryStage.setScene(scene);
+		primaryStage.show();
+	}
+
+	static LinkedHashMap<String, Integer> getResults() {
+		LinkedHashMap<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
 
 		// Gets text with StringBean (no tags)!!
 		StringBean sb = new StringBean();
@@ -22,7 +74,7 @@ class WebpageWordCount {
 		// one list
 		List<String> allWords = new ArrayList<>();
 		for (String s : content.split("\\s+")) {
-			s = s.replaceAll("[^a-zA-z]", "").toLowerCase();
+			s = s.replaceAll("[^a-zA-Z]", "").toLowerCase();
 			if (!(s.isEmpty())) {
 				allWords.add(s);
 			}
@@ -41,16 +93,15 @@ class WebpageWordCount {
 		}
 
 		// Sort map using stream (Java 8)
-		LinkedHashMap<String, Integer> sortedMap = new LinkedHashMap<>();
 		wordMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
 				.forEachOrdered(x -> sortedMap.put(x.getKey(), x.getValue()));
 
-		System.out.println("Words in Macbeth (by number of appearances)");
-		System.out.println("-------------------------------------------");
-		for (Entry<String, Integer> e : sortedMap.entrySet()) {
-			System.out.println(e.getKey() + ": " + e.getValue());
-		}
+		return sortedMap;
+	}
 
+	public static void main(String[] args) {
+
+		launch(args);
 	}
 
 }

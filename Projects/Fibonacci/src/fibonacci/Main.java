@@ -15,7 +15,8 @@ public class Main {
 	 * List holding pairs of the number in the Sequence and the timestamp for
 	 * returning that number
 	 */
-	public static List<Pair<Long, Long>> recursivePoints, iterativePoints = new ArrayList<>();
+	public static List<Pair<Long, Long>> iterativePoints = new ArrayList<>();
+	public static List<Pair<Long, Long>> recursivePoints = new ArrayList<>();
 
 	/**
 	 * DOES NOT WORK AS INTENDED...
@@ -25,12 +26,9 @@ public class Main {
 	 */
 	public static long recursive(long input) {
 		if (input == 0 || input == 1) {
-			recursivePoints.add(new Pair<Long, Long>(input, System.nanoTime()));
 			return input;
 		}
-		long fib = recursive(input - 1) + recursive(input - 2);
-		recursivePoints.add(new Pair<Long, Long>(fib, System.nanoTime()));
-		return fib;
+		return recursive(input - 1) + recursive(input - 2);
 	}
 
 	/**
@@ -46,7 +44,6 @@ public class Main {
 			num2 = sum;
 			sum = num1 + num2;
 		}
-		iterativePoints.add(new Pair<Long, Long>(sum, System.nanoTime()));
 		return sum;
 	}
 
@@ -60,17 +57,27 @@ public class Main {
 		/**
 		 * index of Sequence to run until (used as input for methods)
 		 */
-		int size = 50;
+		int size = 15;
 
 		/**
 		 * starting time to base difference (in nanoseconds) between beginning of method
 		 * to end of method
 		 */
-		long startTime = System.nanoTime();
+		long startTime;
+
+		startTime = System.nanoTime();
 		for (int i = 0; i < size; i++) {
-			iterative(i);
+			iterativePoints.add(new Pair<Long, Long>(iterative(i), System.nanoTime()));
 		}
 		for (Pair<Long, Long> p : iterativePoints) {
+			System.out.println(p.getKey() + ": " + (p.getValue() - startTime));
+		}
+
+		startTime = System.nanoTime();
+		for (int i = 0; i < size; i++) {
+			recursivePoints.add(new Pair<Long, Long>(recursive(i), System.nanoTime()));
+		}
+		for (Pair<Long, Long> p : recursivePoints) {
 			System.out.println(p.getKey() + ": " + (p.getValue() - startTime));
 		}
 
