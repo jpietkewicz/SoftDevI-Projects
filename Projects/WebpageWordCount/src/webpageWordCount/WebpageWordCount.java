@@ -31,7 +31,9 @@ public class WebpageWordCount extends Application {
 
 			@Override
 			public void handle(ActionEvent event) {
-				LinkedHashMap<String, Integer> sortedMap = getResults();
+				String URL = "http://shakespeare.mit.edu/macbeth/full.html";
+
+				LinkedHashMap<String, Integer> sortedMap = sortMap(createMap(getAllWords(removeHTMLTags(URL))));
 				String resultsText = "";
 
 				int i = 0, numToPrint = 20;
@@ -57,33 +59,44 @@ public class WebpageWordCount extends Application {
 		root.getChildren().add(startButton);
 
 		Scene scene = new Scene(root, 300, 100);
-		primaryStage.setTitle("Word Occurences GUI");
+		primaryStage.setTitle("Word Occurences");
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
 
-	static LinkedHashMap<String, Integer> getResults() {
-		LinkedHashMap<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
+	// Gets text with StringBean (no tags)!!
+	String removeHTMLTags(String URL) {
+		String result = null;
 
-		// Gets text with StringBean (no tags)!!
 		StringBean sb = new StringBean();
-		sb.setURL("http://shakespeare.mit.edu/macbeth/full.html");
-		String content = sb.getStrings();
+		sb.setURL(URL);
 
-		// split by all whitespace, take out '-' and downcast capitals, add all words to
-		// one list
+		result = sb.getStrings();
+
+		return result;
+	}
+
+	// split by all whitespace, take out '-' and downcast capitals, add all words to
+	// one list
+	List<String> getAllWords(String words) {
 		List<String> allWords = new ArrayList<>();
-		for (String s : content.split("\\s+")) {
+
+		for (String s : words.split("\\s+")) {
 			s = s.replaceAll("[^a-zA-Z]", "").toLowerCase();
 			if (!(s.isEmpty())) {
 				allWords.add(s);
 			}
 		}
 
-		// put all words into map and add counts
+		return allWords;
+	}
+
+	// put all words into map and add counts
+	Map<String, Integer> createMap(List<String> allWords) {
 		Map<String, Integer> wordMap = new HashMap<>();
+
 		for (String s : allWords) {
-			if (!(wordMap.containsKey(s))) {
+			if (!wordMap.containsKey(s)) {
 				wordMap.put(s, 1);
 			} else {
 				Integer count = wordMap.get(s);
@@ -91,6 +104,12 @@ public class WebpageWordCount extends Application {
 				wordMap.replace(s, count);
 			}
 		}
+
+		return wordMap;
+	}
+
+	LinkedHashMap<String, Integer> sortMap(Map<String, Integer> wordMap) {
+		LinkedHashMap<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
 
 		// Sort map using stream (Java 8)
 		wordMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
@@ -100,7 +119,6 @@ public class WebpageWordCount extends Application {
 	}
 
 	public static void main(String[] args) {
-
 		launch(args);
 	}
 
