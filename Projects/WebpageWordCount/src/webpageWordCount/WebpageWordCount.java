@@ -13,30 +13,83 @@ import org.htmlparser.beans.StringBean;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+/**
+ * 
+ * Application that counts word occurences of a particular webpage and orders by
+ * number of appearances
+ * 
+ * @author Jordan Pietkewicz
+ *
+ */
 public class WebpageWordCount extends Application {
 
+	/**
+	 * Creates form to input URL and number of words to get, then changes to display
+	 * results
+	 * 
+	 * @param primaryStage Stage to add Scenes to
+	 * @throws Exception
+	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		GridPane grid = new GridPane();
+		grid.setAlignment(Pos.CENTER);
+		grid.setHgap(10);
+		grid.setVgap(10);
+		grid.setPadding(new Insets(25, 25, 25, 25));
 
-		Button startButton = new Button("Let's do this!");
-		startButton.setAlignment(Pos.CENTER);
+		Label urlLabel = new Label("URL:");
+		grid.add(urlLabel, 0, 0);
+
+		TextField urlTextField = new TextField("http://shakespeare.mit.edu/macbeth/full.html");
+		grid.add(urlTextField, 1, 0, 2, 1);
+
+		Label entriesLabel = new Label("Entries:");
+		grid.add(entriesLabel, 0, 1);
+
+		TextField entriesTextField = new TextField("20");
+		grid.add(entriesTextField, 1, 1);
+
+		Button startButton = new Button("Get results!");
+		grid.add(startButton, 1, 2);
 		startButton.setOnAction(new EventHandler<ActionEvent>() {
 
+			/**
+			 * @param event ActionEvent of startButton being pressed
+			 */
 			@Override
 			public void handle(ActionEvent event) {
-				String URL = "http://shakespeare.mit.edu/macbeth/full.html";
+				String url = urlTextField.getText();
 
-				LinkedHashMap<String, Integer> sortedMap = sortMap(createMap(getAllWords(removeHTMLTags(URL))));
+				String words = removeHTMLTags(url);
+
+				List<String> allWords = getAllWords(words);
+
+				Map<String, Integer> wordMap = createMap(allWords);
+
+				LinkedHashMap<String, Integer> sortedMap = sortMap(wordMap);
+
 				String resultsText = "";
 
-				int i = 0, numToPrint = 20;
+				int i = 0, numToPrint;
+
+				if (entriesTextField.getText().isEmpty()) {
+					numToPrint = 0;
+				} else {
+					numToPrint = Integer.parseInt(entriesTextField.getText());
+				}
+
 				for (Entry<String, Integer> e : sortedMap.entrySet()) {
 					if (i++ < numToPrint) {
 						resultsText += (i + " - " + e.getKey() + "\n");
@@ -46,38 +99,50 @@ public class WebpageWordCount extends Application {
 				Text results = new Text();
 				results.setText(resultsText);
 
-				StackPane root2 = new StackPane();
-				root2.getChildren().add(results);
-				Scene resultsScene = new Scene(root2, 300, 350);
+				BorderPane root2 = new BorderPane();
+				root2.setCenter(results);
+
+				Scene resultsScene = new Scene(root2);
+
+				primaryStage.setTitle("Word Occurences - Results");
 				primaryStage.setScene(resultsScene);
 				primaryStage.show();
 			}
 
 		});
 
-		StackPane root = new StackPane();
-		root.getChildren().add(startButton);
+		Scene inputScene = new Scene(grid);
 
-		Scene scene = new Scene(root, 300, 100);
-		primaryStage.setTitle("Word Occurences");
-		primaryStage.setScene(scene);
+		primaryStage.setTitle("Word Occurences - Parameters");
+		primaryStage.setScene(inputScene);
 		primaryStage.show();
 	}
 
-	// Gets text with StringBean (no tags)!!
-	String removeHTMLTags(String URL) {
-		String result = null;
+	/**
+	 * Gets text from webpage at specified url with StringBean (no tags!!)
+	 * 
+	 * @param url URL of webpage to get text from
+	 * @return String containing all words from webpage with no HTML tags
+	 * @see <a href="http://htmlparser.sourceforge.net/">HTML Parser</a>
+	 */
+	String removeHTMLTags(String url) {
+		String words = null;
 
 		StringBean sb = new StringBean();
-		sb.setURL(URL);
+		sb.setURL(url);
 
-		result = sb.getStrings();
+		words = sb.getStrings();
 
-		return result;
+		return words;
 	}
 
-	// split by all whitespace, take out '-' and downcast capitals, add all words to
-	// one list
+	/**
+	 * Splits String created by removeHTMLTags() by all whitespace, takes out
+	 * hypens, and downcasts capitals. Populates a List with those words.
+	 * 
+	 * @param words String containing all words from webpage with no HTML tags
+	 * @return List of all words from webpage
+	 */
 	List<String> getAllWords(String words) {
 		List<String> allWords = new ArrayList<>();
 
@@ -91,7 +156,13 @@ public class WebpageWordCount extends Application {
 		return allWords;
 	}
 
-	// put all words into map and add counts
+	/**
+	 * Puts all words from List into Map along with a count of how many times each
+	 * occurs.
+	 * 
+	 * @param allWords List of all words from webpage
+	 * @return Map of word Key and number of occurrences Value
+	 */
 	Map<String, Integer> createMap(List<String> allWords) {
 		Map<String, Integer> wordMap = new HashMap<>();
 
@@ -108,16 +179,28 @@ public class WebpageWordCount extends Application {
 		return wordMap;
 	}
 
+	/**
+	 * Sorts Map by Value from highest to lowest
+	 * 
+	 * @param wordMap Map of word Key and number of occurrences Value
+	 * @return Map sorted by Value from highest to lowest
+	 * @see <a href="https://www.techiedelight.com/sort-map-by-values-java/">Sort
+	 *      Map by Values in Java</a>
+	 */
 	LinkedHashMap<String, Integer> sortMap(Map<String, Integer> wordMap) {
 		LinkedHashMap<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
 
-		// Sort map using stream (Java 8)
 		wordMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
 				.forEachOrdered(x -> sortedMap.put(x.getKey(), x.getValue()));
 
 		return sortedMap;
 	}
 
+	/**
+	 * Launches application to count word occurences
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		launch(args);
 	}
