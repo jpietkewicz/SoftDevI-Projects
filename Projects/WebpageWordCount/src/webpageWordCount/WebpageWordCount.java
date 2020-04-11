@@ -292,11 +292,12 @@ public class WebpageWordCount extends Application {
 			System.out.println("Connected.");
 
 			stmt = conn.createStatement();
-
-			System.out.print("Dropping schema... ");
-			String sql = "DROP SCHEMA " + DB_NAME;
-			stmt.executeUpdate(sql);
-			System.out.println("Dropped.");
+			String sql;
+			
+//			System.out.print("Dropping schema... ");
+//			sql = "DROP SCHEMA " + DB_NAME;
+//			stmt.executeUpdate(sql);
+//			System.out.println("Dropped.");
 
 			System.out.print("Creating schema... ");
 			sql = "CREATE SCHEMA IF NOT EXISTS " + DB_NAME;
@@ -327,11 +328,12 @@ public class WebpageWordCount extends Application {
 			System.out.println("Connected.");
 
 			stmt = conn.createStatement();
+			String sql;
 
-			System.out.print("Dropping table... ");
-			String sql = "DROP TABLE WORD";
-			stmt.executeUpdate(sql);
-			System.out.println("Dropped.");
+//			System.out.print("Dropping table... ");
+//			sql = "DROP TABLE WORD";
+//			stmt.executeUpdate(sql);
+//			System.out.println("Dropped.");
 
 			System.out.print("Creating table... ");
 			sql = "CREATE TABLE IF NOT EXISTS WORD " + "(id INTEGER UNSIGNED NOT NULL, " + "word VARCHAR(255), "
