@@ -25,6 +25,7 @@ public class Server extends Application {
 		new Thread(() -> {
 			try {
 				// Create a server socket
+				@SuppressWarnings("resource")
 				ServerSocket serverSocket = new ServerSocket(8000);
 				Platform.runLater(() -> ta.appendText("Server started at " + new Date() + '\n'));
 
@@ -37,7 +38,7 @@ public class Server extends Application {
 
 				while (true) {
 					// Receive radius from the client
-					int num = inputFromClient.readInt();
+					long num = inputFromClient.readLong();
 
 					boolean isPrime = checkPrime(num);
 
@@ -46,7 +47,6 @@ public class Server extends Application {
 
 					Platform.runLater(() -> {
 						ta.appendText("Number received from client: " + num + '\n');
-						// ta.appendText("Number is" + (isPrime ? "" : "n't") + " prime\n");
 					});
 				}
 			} catch (IOException ex) {
@@ -55,7 +55,7 @@ public class Server extends Application {
 		}).start();
 	}
 
-	private boolean checkPrime(int num) {
+	private boolean checkPrime(long num) {
 		if (num == 2) {
 			return true;
 		}

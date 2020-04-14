@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class SortMapTest {
 
 	@Test
-	void test() {
+	void test() throws Exception {
 
 		WebpageWordCount object = new WebpageWordCount();
 		

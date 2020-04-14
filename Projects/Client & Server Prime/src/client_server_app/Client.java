@@ -45,10 +45,10 @@ public class Client extends Application {
     tf.setOnAction(e -> {
       try {
     	// Get number from text field
-        int num = Integer.parseInt(tf.getText().trim());
+        long num = Long.parseLong(tf.getText().trim());
   
         // Send the number to the server
-        toServer.writeInt(num);
+        toServer.writeLong(num);
         toServer.flush();
   
         // Get answer from server
@@ -65,7 +65,8 @@ public class Client extends Application {
   
     try {
       // Create a socket to connect to the server
-      Socket socket = new Socket("localhost", 8000);
+      @SuppressWarnings("resource")
+	Socket socket = new Socket("localhost", 8000);
       // Socket socket = new Socket("130.254.204.36", 8000);
       // Socket socket = new Socket("drake.Armstrong.edu", 8000);
 

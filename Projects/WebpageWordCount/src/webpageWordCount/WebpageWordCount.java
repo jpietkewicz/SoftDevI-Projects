@@ -31,7 +31,7 @@ import javafx.stage.Stage;
 
 /**
  * 
- * Application that counts word occurences of a particular webpage and orders by
+ * Application that counts word occurrences of a particular webpage and orders by
  * number of appearances
  * 
  * @author Jordan Pietkewicz
@@ -39,13 +39,30 @@ import javafx.stage.Stage;
  */
 public class WebpageWordCount extends Application {
 
-	static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-	static final String DB_URL = "jdbc:mysql://localhost:3306/";
-	static final String DB_NAME = "WORD_OCCURRENCES";
-	
-	// MUST ENTER IN CREDENTIALS FOR YOUR COMPUTER
-	static final String DB_USER = "root";
-	static final String DB_PASS = "";
+	private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+	private static final String DB_URL = "jdbc:mysql://localhost:3306/";
+	private static final String DB_NAME = "WORD_OCCURRENCES";
+
+	private static String DB_USER = null;
+	private static String DB_PASS = null;
+
+	/**
+	 * Sets username for mysql for local computer
+	 * 
+	 * @param dB_USER username for mysql
+	 */
+	public static void setDB_USER(String dB_USER) {
+		DB_USER = dB_USER;
+	}
+
+	/**
+	 * Sets password for mysql for local computer
+	 * 
+	 * @param dB_PASS password for mysql
+	 */
+	public static void setDB_PASS(String dB_PASS) {
+		DB_PASS = dB_PASS;
+	}
 
 	/**
 	 * Creates form to input URL and number of words to get, then changes to display
@@ -83,6 +100,13 @@ public class WebpageWordCount extends Application {
 			 */
 			@Override
 			public void handle(ActionEvent event) {
+				try {
+					createSchema();
+					createTable();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
 				String url = urlTextField.getText();
 
 				String words = removeHTMLTags(url);
@@ -104,7 +128,7 @@ public class WebpageWordCount extends Application {
 				if (entriesTextField.getText().isEmpty()) {
 					numToPrint = 0;
 				} else {
-					numToPrint = Integer.parseInt(entriesTextField.getText());
+					numToPrint = Integer.parseInt(entriesTextField.getText().trim());
 				}
 
 				Connection conn = null;
@@ -147,7 +171,7 @@ public class WebpageWordCount extends Application {
 
 		});
 
-		Scene inputScene = new Scene(grid);
+		Scene inputScene = new Scene(grid, 300, 275);
 
 		primaryStage.setTitle("Word Occurences - Parameters");
 		primaryStage.setScene(inputScene);
@@ -216,7 +240,7 @@ public class WebpageWordCount extends Application {
 	}
 
 	/**
-	 * Sorts Map by Value from highest to lowest
+	 * Sorts Map by Value from highest to lowest and inserts into mysql database
 	 * 
 	 * @param wordMap Map of word Key and number of occurrences Value
 	 * @return Map sorted by Value from highest to lowest
@@ -293,11 +317,11 @@ public class WebpageWordCount extends Application {
 
 			stmt = conn.createStatement();
 			String sql;
-			
-//			System.out.print("Dropping schema... ");
-//			sql = "DROP SCHEMA " + DB_NAME;
-//			stmt.executeUpdate(sql);
-//			System.out.println("Dropped.");
+
+			System.out.print("Dropping schema... ");
+			sql = "DROP SCHEMA " + DB_NAME;
+			stmt.executeUpdate(sql);
+			System.out.println("Dropped.");
 
 			System.out.print("Creating schema... ");
 			sql = "CREATE SCHEMA IF NOT EXISTS " + DB_NAME;
@@ -330,11 +354,6 @@ public class WebpageWordCount extends Application {
 			stmt = conn.createStatement();
 			String sql;
 
-//			System.out.print("Dropping table... ");
-//			sql = "DROP TABLE WORD";
-//			stmt.executeUpdate(sql);
-//			System.out.println("Dropped.");
-
 			System.out.print("Creating table... ");
 			sql = "CREATE TABLE IF NOT EXISTS WORD " + "(id INTEGER UNSIGNED NOT NULL, " + "word VARCHAR(255), "
 					+ "count INTEGER, PRIMARY KEY (id))";
@@ -350,19 +369,13 @@ public class WebpageWordCount extends Application {
 	}
 
 	/**
-	 * Creates schema and table for words. Launches application to count word
-	 * occurrences.
+	 * Launches application to count word occurrences.
 	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		try {
-			createSchema();
-			createTable();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		launch(args);
+		Login log = new Login();
+		launch(log.getClass(), args);
 	}
 
 }
